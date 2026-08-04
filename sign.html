@@ -1,42 +1,167 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
+    <meta charset="utf-8">
 
-<meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <title>Sign Document</title>
 
-<title>EasySign</title>
-
-<link rel="stylesheet" href="styles.css">
-
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
 </head>
 
 <body>
+    <header class="site-header">
+        <div class="header-content">
+            <div>
+                <h1>EasySign</h1>
 
-<div class="container">
+                <p id="tenantName">
+                    Loading document…
+                </p>
+            </div>
 
-<h1 id="tenantName">
+            <span
+                id="requestStatus"
+                class="status-badge"
+            >
+                Pending
+            </span>
+        </div>
+    </header>
 
-Loading...
+    <main class="page-container">
+        <section
+            id="loadingCard"
+            class="card loading-card"
+        >
+            <div class="spinner"></div>
 
-</h1>
+            <p>
+                Loading your document…
+            </p>
+        </section>
 
-<div class="card">
+        <section
+            id="errorCard"
+            class="card hidden"
+        >
+            <h2>Unable to open document</h2>
 
-<iframe
-id="leasePDF">
-</iframe>
+            <p id="errorMessage">
+                The signing link may be invalid or expired.
+            </p>
+        </section>
 
-</div>
+        <div
+            id="signingContent"
+            class="hidden"
+        >
+            <section class="card">
+                <div class="section-heading">
+                    <div>
+                        <h2>Review your document</h2>
 
-</div>
+                        <p>
+                            Read the complete lease before signing.
+                        </p>
+                    </div>
+                </div>
 
-<script src="sign.js"></script>
+                <iframe
+                    id="leasePDF"
+                    title="Lease agreement"
+                ></iframe>
+            </section>
 
+            <section class="card signature-section">
+                <div class="section-heading">
+                    <div>
+                        <h2>Your signature</h2>
+
+                        <p>
+                            Draw your signature using your finger,
+                            mouse, or trackpad.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="signature-wrapper">
+                    <canvas
+                        id="signatureCanvas"
+                        aria-label="Signature drawing area"
+                    ></canvas>
+
+                    <span class="signature-line"></span>
+
+                    <span class="signature-hint">
+                        Sign above the line
+                    </span>
+                </div>
+
+                <div class="signature-actions">
+                    <button
+                        id="clearSignatureButton"
+                        class="secondary-button"
+                        type="button"
+                    >
+                        Clear
+                    </button>
+                </div>
+
+                <label class="consent-row">
+                    <input
+                        id="consentCheckbox"
+                        type="checkbox"
+                    >
+
+                    <span>
+                        I have reviewed this document and agree
+                        that this electronic signature represents
+                        my intent to sign it.
+                    </span>
+                </label>
+
+                <button
+                    id="acceptSignatureButton"
+                    class="primary-button"
+                    type="button"
+                    disabled
+                >
+                    Accept Signature
+                </button>
+
+                <p
+                    id="signatureMessage"
+                    class="form-message"
+                ></p>
+            </section>
+
+            <section
+                id="signaturePreviewCard"
+                class="card hidden"
+            >
+                <h2>Signature captured</h2>
+
+                <p>
+                    This preview is currently stored only in your
+                    browser. We will connect it to EasySign next.
+                </p>
+
+                <img
+                    id="signaturePreview"
+                    alt="Signature preview"
+                >
+            </section>
+        </div>
+    </main>
+
+    <script src="sign.js"></script>
 </body>
-
 </html>

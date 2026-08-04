@@ -1,0 +1,86 @@
+*{
+    box-sizing:border-box;
+}
+
+body{
+
+    margin:0;
+
+    background:#f2f2f7;
+
+    font-family:-apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+    color:#222;
+
+}
+
+.container{
+
+    max-width:900px;
+
+    margin:auto;
+
+    padding:40px;
+
+}
+
+h1{
+
+    font-size:42px;
+
+    margin-bottom:5px;
+
+}
+
+.subtitle{
+
+    color:#666;
+
+    margin-bottom:35px;
+
+}
+
+.button{
+
+    display:inline-block;
+
+    padding:16px 30px;
+
+    background:#0A84FF;
+
+    color:white;
+
+    text-decoration:none;
+
+    border-radius:12px;
+
+    font-weight:bold;
+
+}
+
+.card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:20px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+
+}
+
+iframe{
+
+    width:100%;
+
+    height:80vh;
+
+    border:none;
+
+    border-radius:12px;
+
+}

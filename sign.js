@@ -46,9 +46,7 @@ const canvas =
     );
 
 const context =
-    canvas.getContext(
-        "2d"
-    );
+    canvas.getContext("2d");
 
 const clearButton =
     document.getElementById(
@@ -92,6 +90,8 @@ if (!token) {
     loadSigningRequest();
 }
 
+// MARK: - Load Signing Request
+
 async function loadSigningRequest() {
     try {
         const endpoint =
@@ -118,9 +118,7 @@ async function loadSigningRequest() {
             `${data.tenant_name}, please review and sign.`;
 
         requestStatusElement.textContent =
-            formatStatus(
-                data.status
-            );
+            formatStatus(data.status);
 
         leasePDF.src =
             data.pdf_url;
@@ -133,7 +131,9 @@ async function loadSigningRequest() {
             "hidden"
         );
 
-        resizeCanvas();
+        requestAnimationFrame(
+            resizeCanvas
+        );
     } catch (error) {
         console.error(error);
 
@@ -172,6 +172,8 @@ function formatStatus(status) {
         + status.slice(1);
 }
 
+// MARK: - Canvas Setup
+
 function resizeCanvas() {
     const rectangle =
         canvas.getBoundingClientRect();
@@ -180,15 +182,21 @@ function resizeCanvas() {
         window.devicePixelRatio || 1;
 
     canvas.width =
-        Math.round(
-            rectangle.width
-            * pixelRatio
+        Math.max(
+            1,
+            Math.round(
+                rectangle.width
+                * pixelRatio
+            )
         );
 
     canvas.height =
-        Math.round(
-            rectangle.height
-            * pixelRatio
+        Math.max(
+            1,
+            Math.round(
+                rectangle.height
+                * pixelRatio
+            )
         );
 
     context.setTransform(
@@ -210,42 +218,30 @@ function configureDrawingContext() {
     context.strokeStyle = "#111111";
 }
 
-function pointFromEvent(event) {
+function pointFromClientCoordinates(
+    clientX,
+    clientY
+) {
     const rectangle =
         canvas.getBoundingClientRect();
 
     return {
         x:
-            event.clientX
+            clientX
             - rectangle.left,
         y:
-            event.clientY
+            clientY
             - rectangle.top
     };
 }
 
-function beginDrawing(event) {
-    event.preventDefault();
-
-    isDrawing = true;
-
-    lastPoint =
-        pointFromEvent(event);
-
-    canvas.setPointerCapture(
-        event.pointerId
-    );
-}
-
-function continueDrawing(event) {
-    if (!isDrawing) {
+function drawToPoint(currentPoint) {
+    if (
+        !isDrawing
+        || !lastPoint
+    ) {
         return;
     }
-
-    event.preventDefault();
-
-    const currentPoint =
-        pointFromEvent(event);
 
     context.beginPath();
 
@@ -261,25 +257,66 @@ function continueDrawing(event) {
 
     context.stroke();
 
-    lastPoint = currentPoint;
+    lastPoint =
+        currentPoint;
 
     hasSignature = true;
 
     updateAcceptButton();
 }
 
-function endDrawing(event) {
+function finishDrawing() {
+    isDrawing = false;
+    lastPoint = null;
+}
+
+// MARK: - Pointer Events
+
+function beginPointerDrawing(event) {
+    event.preventDefault();
+
+    isDrawing = true;
+
+    lastPoint =
+        pointFromClientCoordinates(
+            event.clientX,
+            event.clientY
+        );
+
+    if (
+        canvas.setPointerCapture
+    ) {
+        canvas.setPointerCapture(
+            event.pointerId
+        );
+    }
+}
+
+function continuePointerDrawing(event) {
     if (!isDrawing) {
         return;
     }
 
     event.preventDefault();
 
-    isDrawing = false;
-    lastPoint = null;
+    drawToPoint(
+        pointFromClientCoordinates(
+            event.clientX,
+            event.clientY
+        )
+    );
+}
+
+function endPointerDrawing(event) {
+    if (!isDrawing) {
+        return;
+    }
+
+    event.preventDefault();
 
     if (
-        canvas.hasPointerCapture(
+        canvas.hasPointerCapture
+        && canvas.hasPointerCapture(
             event.pointerId
         )
     ) {
@@ -287,7 +324,60 @@ function endDrawing(event) {
             event.pointerId
         );
     }
+
+    finishDrawing();
 }
+
+// MARK: - iPhone Touch Fallback
+
+function beginTouchDrawing(event) {
+    event.preventDefault();
+
+    const touch =
+        event.touches[0];
+
+    if (!touch) {
+        return;
+    }
+
+    isDrawing = true;
+
+    lastPoint =
+        pointFromClientCoordinates(
+            touch.clientX,
+            touch.clientY
+        );
+}
+
+function continueTouchDrawing(event) {
+    if (!isDrawing) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const touch =
+        event.touches[0];
+
+    if (!touch) {
+        return;
+    }
+
+    drawToPoint(
+        pointFromClientCoordinates(
+            touch.clientX,
+            touch.clientY
+        )
+    );
+}
+
+function endTouchDrawing(event) {
+    event.preventDefault();
+
+    finishDrawing();
+}
+
+// MARK: - Signature Actions
 
 function clearSignature() {
     context.clearRect(
@@ -299,7 +389,8 @@ function clearSignature() {
 
     hasSignature = false;
 
-    signatureMessage.textContent = "";
+    signatureMessage.textContent =
+        "";
 
     signaturePreviewCard.classList.add(
         "hidden"
@@ -354,32 +445,57 @@ function acceptSignature() {
     });
 }
 
+// MARK: - Event Listeners
+
 canvas.addEventListener(
     "pointerdown",
-    beginDrawing
+    beginPointerDrawing
 );
 
 canvas.addEventListener(
     "pointermove",
-    continueDrawing
+    continuePointerDrawing
 );
 
 canvas.addEventListener(
     "pointerup",
-    endDrawing
+    endPointerDrawing
 );
 
 canvas.addEventListener(
     "pointercancel",
-    endDrawing
+    endPointerDrawing
 );
 
 canvas.addEventListener(
-    "pointerleave",
-    event => {
-        if (isDrawing) {
-            endDrawing(event);
-        }
+    "touchstart",
+    beginTouchDrawing,
+    {
+        passive: false
+    }
+);
+
+canvas.addEventListener(
+    "touchmove",
+    continueTouchDrawing,
+    {
+        passive: false
+    }
+);
+
+canvas.addEventListener(
+    "touchend",
+    endTouchDrawing,
+    {
+        passive: false
+    }
+);
+
+canvas.addEventListener(
+    "touchcancel",
+    endTouchDrawing,
+    {
+        passive: false
     }
 );
 

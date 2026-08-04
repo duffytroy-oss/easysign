@@ -11,7 +11,7 @@ if(!token){
 }
 
 fetch(
-"https://ltatudiuhozwbufqybxd.supabase.co/functions/v1/sign-document?token=" + token
+"https://ltatudiuhozwbufqybxd.supabase.co/functions/v1/sign-document-api?token=" + token
 )
 
 .then(r=>r.json())

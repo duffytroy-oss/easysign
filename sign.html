@@ -80,7 +80,10 @@
                 ></iframe>
             </section>
 
-            <section class="card signature-section">
+            <section
+                id="signatureCard"
+                class="card signature-section"
+            >
                 <div class="section-heading">
                     <div>
                         <h2>Your signature</h2>
@@ -92,7 +95,10 @@
                     </div>
                 </div>
 
-                <div class="signature-wrapper">
+                <div
+                    id="signatureWrapper"
+                    class="signature-wrapper"
+                >
                     <canvas
                         id="signatureCanvas"
                         aria-label="Signature drawing area"
@@ -103,6 +109,19 @@
                     <span class="signature-hint">
                         Sign above the line
                     </span>
+
+                    <div
+                        id="signatureLockedOverlay"
+                        class="signature-locked-overlay hidden"
+                    >
+                        <div class="accepted-checkmark">
+                            ✓
+                        </div>
+
+                        <strong>
+                            Signature Accepted
+                        </strong>
+                    </div>
                 </div>
 
                 <div class="signature-actions">
@@ -113,9 +132,20 @@
                     >
                         Clear
                     </button>
+
+                    <button
+                        id="replaceSignatureButton"
+                        class="secondary-button hidden"
+                        type="button"
+                    >
+                        Replace Signature
+                    </button>
                 </div>
 
-                <label class="consent-row">
+                <label
+                    id="consentRow"
+                    class="consent-row"
+                >
                     <input
                         id="consentCheckbox"
                         type="checkbox"
@@ -144,20 +174,89 @@
             </section>
 
             <section
-                id="signaturePreviewCard"
+                id="finalReviewCard"
                 class="card hidden"
             >
-                <h2>Signature captured</h2>
+                <div class="completion-heading">
+                    <div class="completion-icon">
+                        ✓
+                    </div>
+
+                    <div>
+                        <h2>Ready to complete</h2>
+
+                        <p>
+                            Review the information below before
+                            submitting your signed document.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="review-list">
+                    <div class="review-row">
+                        <span class="review-checkmark">
+                            ✓
+                        </span>
+
+                        <span>
+                            Document reviewed
+                        </span>
+                    </div>
+
+                    <div class="review-row">
+                        <span class="review-checkmark">
+                            ✓
+                        </span>
+
+                        <span>
+                            Signature accepted
+                        </span>
+                    </div>
+
+                    <div class="review-row">
+                        <span class="review-checkmark">
+                            ✓
+                        </span>
+
+                        <span id="signedDateText">
+                            Signing date recorded
+                        </span>
+                    </div>
+                </div>
+
+                <button
+                    id="completeSigningButton"
+                    class="primary-button"
+                    type="button"
+                >
+                    Complete Signing
+                </button>
+
+                <p
+                    id="completionMessage"
+                    class="form-message"
+                ></p>
+            </section>
+
+            <section
+                id="testCompletionCard"
+                class="card success-card hidden"
+            >
+                <div class="large-success-icon">
+                    ✓
+                </div>
+
+                <h2>Signing test complete</h2>
 
                 <p>
-                    This preview is currently stored only in your
-                    browser. We will connect it to EasySign next.
+                    Your signature was captured successfully.
+                    It has not been uploaded yet.
                 </p>
 
-                <img
-                    id="signaturePreview"
-                    alt="Signature preview"
-                >
+                <p class="small-note">
+                    The next step will securely save the signature
+                    and update the signing request in EasySign.
+                </p>
             </section>
         </div>
     </main>

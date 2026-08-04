@@ -48,9 +48,29 @@ const canvas =
 const context =
     canvas.getContext("2d");
 
+const signatureWrapper =
+    document.getElementById(
+        "signatureWrapper"
+    );
+
+const signatureLockedOverlay =
+    document.getElementById(
+        "signatureLockedOverlay"
+    );
+
 const clearButton =
     document.getElementById(
         "clearSignatureButton"
+    );
+
+const replaceButton =
+    document.getElementById(
+        "replaceSignatureButton"
+    );
+
+const consentRow =
+    document.getElementById(
+        "consentRow"
     );
 
 const consentCheckbox =
@@ -68,19 +88,36 @@ const signatureMessage =
         "signatureMessage"
     );
 
-const signaturePreviewCard =
+const finalReviewCard =
     document.getElementById(
-        "signaturePreviewCard"
+        "finalReviewCard"
     );
 
-const signaturePreview =
+const signedDateText =
     document.getElementById(
-        "signaturePreview"
+        "signedDateText"
+    );
+
+const completeSigningButton =
+    document.getElementById(
+        "completeSigningButton"
+    );
+
+const completionMessage =
+    document.getElementById(
+        "completionMessage"
+    );
+
+const testCompletionCard =
+    document.getElementById(
+        "testCompletionCard"
     );
 
 let isDrawing = false;
 let hasSignature = false;
+let signatureAccepted = false;
 let lastPoint = null;
+let acceptedSignatureDataURL = null;
 
 if (!token) {
     showError(
@@ -118,7 +155,9 @@ async function loadSigningRequest() {
             `${data.tenant_name}, please review and sign.`;
 
         requestStatusElement.textContent =
-            formatStatus(data.status);
+            formatStatus(
+                data.status
+            );
 
         leasePDF.src =
             data.pdf_url;
@@ -239,6 +278,7 @@ function drawToPoint(currentPoint) {
     if (
         !isDrawing
         || !lastPoint
+        || signatureAccepted
     ) {
         return;
     }
@@ -273,6 +313,10 @@ function finishDrawing() {
 // MARK: - Pointer Events
 
 function beginPointerDrawing(event) {
+    if (signatureAccepted) {
+        return;
+    }
+
     event.preventDefault();
 
     isDrawing = true;
@@ -283,9 +327,7 @@ function beginPointerDrawing(event) {
             event.clientY
         );
 
-    if (
-        canvas.setPointerCapture
-    ) {
+    if (canvas.setPointerCapture) {
         canvas.setPointerCapture(
             event.pointerId
         );
@@ -293,7 +335,10 @@ function beginPointerDrawing(event) {
 }
 
 function continuePointerDrawing(event) {
-    if (!isDrawing) {
+    if (
+        !isDrawing
+        || signatureAccepted
+    ) {
         return;
     }
 
@@ -328,9 +373,13 @@ function endPointerDrawing(event) {
     finishDrawing();
 }
 
-// MARK: - iPhone Touch Fallback
+// MARK: - iPhone Touch Events
 
 function beginTouchDrawing(event) {
+    if (signatureAccepted) {
+        return;
+    }
+
     event.preventDefault();
 
     const touch =
@@ -350,7 +399,10 @@ function beginTouchDrawing(event) {
 }
 
 function continueTouchDrawing(event) {
-    if (!isDrawing) {
+    if (
+        !isDrawing
+        || signatureAccepted
+    ) {
         return;
     }
 
@@ -379,26 +431,29 @@ function endTouchDrawing(event) {
 
 // MARK: - Signature Actions
 
-function clearSignature() {
+function clearCanvas() {
+    const rectangle =
+        canvas.getBoundingClientRect();
+
     context.clearRect(
         0,
         0,
-        canvas.width,
-        canvas.height
+        rectangle.width,
+        rectangle.height
     );
+}
+
+function clearSignature() {
+    if (signatureAccepted) {
+        return;
+    }
+
+    clearCanvas();
 
     hasSignature = false;
 
     signatureMessage.textContent =
         "";
-
-    signaturePreviewCard.classList.add(
-        "hidden"
-    );
-
-    signaturePreview.removeAttribute(
-        "src"
-    );
 
     updateAcceptButton();
 }
@@ -406,7 +461,8 @@ function clearSignature() {
 function updateAcceptButton() {
     acceptButton.disabled =
         !hasSignature
-        || !consentCheckbox.checked;
+        || !consentCheckbox.checked
+        || signatureAccepted;
 }
 
 function acceptSignature() {
@@ -424,25 +480,186 @@ function acceptSignature() {
         return;
     }
 
-    const signatureDataURL =
+    acceptedSignatureDataURL =
         canvas.toDataURL(
             "image/png"
         );
 
-    signaturePreview.src =
-        signatureDataURL;
+    signatureAccepted = true;
+    isDrawing = false;
 
-    signaturePreviewCard.classList.remove(
+    canvas.classList.add(
+        "canvas-locked"
+    );
+
+    signatureWrapper.classList.add(
+        "signature-wrapper-accepted"
+    );
+
+    signatureLockedOverlay.classList.remove(
+        "hidden"
+    );
+
+    clearButton.classList.add(
+        "hidden"
+    );
+
+    replaceButton.classList.remove(
+        "hidden"
+    );
+
+    consentRow.classList.add(
+        "consent-locked"
+    );
+
+    consentCheckbox.disabled = true;
+
+    acceptButton.classList.add(
         "hidden"
     );
 
     signatureMessage.textContent =
-        "Signature captured successfully.";
+        "";
 
-    signaturePreviewCard.scrollIntoView({
+    requestStatusElement.textContent =
+        "Signature Accepted";
+
+    requestStatusElement.classList.add(
+        "status-badge-success"
+    );
+
+    signedDateText.textContent =
+        `Signing date: ${formattedSigningDate()}`;
+
+    finalReviewCard.classList.remove(
+        "hidden"
+    );
+
+    finalReviewCard.scrollIntoView({
         behavior: "smooth",
         block: "center"
     });
+}
+
+function replaceSignature() {
+    signatureAccepted = false;
+    acceptedSignatureDataURL = null;
+
+    canvas.classList.remove(
+        "canvas-locked"
+    );
+
+    signatureWrapper.classList.remove(
+        "signature-wrapper-accepted"
+    );
+
+    signatureLockedOverlay.classList.add(
+        "hidden"
+    );
+
+    clearButton.classList.remove(
+        "hidden"
+    );
+
+    replaceButton.classList.add(
+        "hidden"
+    );
+
+    consentRow.classList.remove(
+        "consent-locked"
+    );
+
+    consentCheckbox.disabled = false;
+    consentCheckbox.checked = false;
+
+    acceptButton.classList.remove(
+        "hidden"
+    );
+
+    finalReviewCard.classList.add(
+        "hidden"
+    );
+
+    testCompletionCard.classList.add(
+        "hidden"
+    );
+
+    requestStatusElement.textContent =
+        "Pending";
+
+    requestStatusElement.classList.remove(
+        "status-badge-success"
+    );
+
+    clearCanvas();
+
+    hasSignature = false;
+
+    updateAcceptButton();
+}
+
+function formattedSigningDate() {
+    return new Intl.DateTimeFormat(
+        undefined,
+        {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit"
+        }
+    ).format(
+        new Date()
+    );
+}
+
+// MARK: - Temporary Completion Test
+
+function completeSigning() {
+    if (
+        !signatureAccepted
+        || !acceptedSignatureDataURL
+    ) {
+        completionMessage.textContent =
+            "Accept your signature before completing the document.";
+
+        return;
+    }
+
+    completeSigningButton.disabled = true;
+
+    completeSigningButton.textContent =
+        "Completing…";
+
+    completionMessage.textContent =
+        "";
+
+    window.setTimeout(
+        () => {
+            finalReviewCard.classList.add(
+                "hidden"
+            );
+
+            testCompletionCard.classList.remove(
+                "hidden"
+            );
+
+            requestStatusElement.textContent =
+                "Test Complete";
+
+            testCompletionCard.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+            completeSigningButton.disabled =
+                false;
+
+            completeSigningButton.textContent =
+                "Complete Signing";
+        },
+        500
+    );
 }
 
 // MARK: - Event Listeners
@@ -504,6 +721,11 @@ clearButton.addEventListener(
     clearSignature
 );
 
+replaceButton.addEventListener(
+    "click",
+    replaceSignature
+);
+
 consentCheckbox.addEventListener(
     "change",
     updateAcceptButton
@@ -514,10 +736,18 @@ acceptButton.addEventListener(
     acceptSignature
 );
 
+completeSigningButton.addEventListener(
+    "click",
+    completeSigning
+);
+
 window.addEventListener(
     "resize",
     () => {
-        if (!hasSignature) {
+        if (
+            !hasSignature
+            && !signatureAccepted
+        ) {
             resizeCanvas();
         }
     }

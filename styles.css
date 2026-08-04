@@ -269,3 +269,130 @@ iframe {
         height: 210px;
     }
 }
+
+
+.signature-wrapper-accepted {
+    border-color: #34c759;
+    background: #f4fff6;
+}
+
+.canvas-locked {
+    opacity: 0.72;
+    pointer-events: none;
+}
+
+.signature-locked-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(244, 255, 246, 0.88);
+    color: #167c2e;
+    pointer-events: none;
+}
+
+.accepted-checkmark {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #34c759;
+    color: #ffffff;
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.status-badge-success {
+    background: #dff8e4;
+    color: #167c2e;
+}
+
+.consent-locked {
+    opacity: 0.65;
+}
+
+.completion-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.completion-heading h2 {
+    margin: 0;
+}
+
+.completion-heading p {
+    margin-top: 5px;
+}
+
+.completion-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #34c759;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.review-list {
+    margin-top: 22px;
+    overflow: hidden;
+    border: 1px solid #d8d8dc;
+    border-radius: 13px;
+}
+
+.review-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 14px;
+    border-bottom: 1px solid #e5e5ea;
+}
+
+.review-row:last-child {
+    border-bottom: 0;
+}
+
+.review-checkmark {
+    width: 23px;
+    height: 23px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #dff8e4;
+    color: #167c2e;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.success-card {
+    text-align: center;
+    padding-top: 34px;
+    padding-bottom: 34px;
+}
+
+.large-success-icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 16px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #34c759;
+    color: #ffffff;
+    font-size: 38px;
+    font-weight: 800;
+}
+
+.small-note {
+    font-size: 14px;
+}

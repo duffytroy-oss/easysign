@@ -613,9 +613,9 @@ function formattedSigningDate() {
     );
 }
 
-// MARK: - Temporary Completion Test
+// MARK: - Complete Signing
 
-function completeSigning() {
+async function completeSigning() {
     if (
         !signatureAccepted
         || !acceptedSignatureDataURL
@@ -634,32 +634,92 @@ function completeSigning() {
     completionMessage.textContent =
         "";
 
-    window.setTimeout(
-        () => {
-            finalReviewCard.classList.add(
-                "hidden"
+    try {
+        const endpoint =
+            "https://ltatudiuhozwbufqybxd.supabase.co/functions/v1/complete-signing";
+
+        const response =
+            await fetch(
+                endpoint,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        signature_data_url:
+                            acceptedSignatureDataURL
+                    })
+                }
             );
 
-            testCompletionCard.classList.remove(
-                "hidden"
+        const data =
+            await response.json();
+
+        if (
+            !response.ok
+            || !data.success
+        ) {
+            throw new Error(
+                data.message
+                || "Unable to complete signing."
+            );
+        }
+
+        finalReviewCard.classList.add(
+            "hidden"
+        );
+
+        testCompletionCard.classList.remove(
+            "hidden"
+        );
+
+        requestStatusElement.textContent =
+            "Signed";
+
+        requestStatusElement.classList.add(
+            "status-badge-success"
+        );
+
+        const completionHeading =
+            testCompletionCard.querySelector(
+                "h2"
             );
 
-            requestStatusElement.textContent =
-                "Test Complete";
+        const completionText =
+            testCompletionCard.querySelector(
+                "p"
+            );
 
-            testCompletionCard.scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-            });
+        if (completionHeading) {
+            completionHeading.textContent =
+                "Document signed";
+        }
 
-            completeSigningButton.disabled =
-                false;
+        if (completionText) {
+            completionText.textContent =
+                "Your signature was saved successfully.";
+        }
 
-            completeSigningButton.textContent =
-                "Complete Signing";
-        },
-        500
-    );
+        testCompletionCard.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    } catch (error) {
+        console.error(error);
+
+        completionMessage.textContent =
+            error.message
+            || "Unable to complete signing.";
+
+        completeSigningButton.disabled =
+            false;
+
+        completeSigningButton.textContent =
+            "Complete Signing";
+    }
 }
 
 // MARK: - Event Listeners

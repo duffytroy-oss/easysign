@@ -465,6 +465,161 @@ function updateAcceptButton() {
         || signatureAccepted;
 }
 
+
+function croppedSignatureDataURL() {
+    const pixelRatio =
+        window.devicePixelRatio || 1;
+
+    const imageData =
+        context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+    const data =
+        imageData.data;
+
+    let minX =
+        canvas.width;
+
+    let minY =
+        canvas.height;
+
+    let maxX = -1;
+    let maxY = -1;
+
+    for (
+        let y = 0;
+        y < canvas.height;
+        y += 1
+    ) {
+        for (
+            let x = 0;
+            x < canvas.width;
+            x += 1
+        ) {
+            const index =
+                (
+                    y
+                    * canvas.width
+                    + x
+                )
+                * 4;
+
+            const alpha =
+                data[index + 3];
+
+            if (alpha > 10) {
+                minX =
+                    Math.min(
+                        minX,
+                        x
+                    );
+
+                minY =
+                    Math.min(
+                        minY,
+                        y
+                    );
+
+                maxX =
+                    Math.max(
+                        maxX,
+                        x
+                    );
+
+                maxY =
+                    Math.max(
+                        maxY,
+                        y
+                    );
+            }
+        }
+    }
+
+    if (
+        maxX < minX
+        || maxY < minY
+    ) {
+        return canvas.toDataURL(
+            "image/png"
+        );
+    }
+
+    const padding =
+        Math.round(
+            12
+            * pixelRatio
+        );
+
+    minX =
+        Math.max(
+            0,
+            minX - padding
+        );
+
+    minY =
+        Math.max(
+            0,
+            minY - padding
+        );
+
+    maxX =
+        Math.min(
+            canvas.width - 1,
+            maxX + padding
+        );
+
+    maxY =
+        Math.min(
+            canvas.height - 1,
+            maxY + padding
+        );
+
+    const cropWidth =
+        maxX - minX + 1;
+
+    const cropHeight =
+        maxY - minY + 1;
+
+    const croppedCanvas =
+        document.createElement(
+            "canvas"
+        );
+
+    croppedCanvas.width =
+        cropWidth;
+
+    croppedCanvas.height =
+        cropHeight;
+
+    const croppedContext =
+        croppedCanvas.getContext(
+            "2d"
+        );
+
+    croppedContext.drawImage(
+        canvas,
+        minX,
+        minY,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        cropWidth,
+        cropHeight
+    );
+
+    return croppedCanvas
+        .toDataURL(
+            "image/png"
+        );
+}
+
+
+
 function acceptSignature() {
     if (!hasSignature) {
         signatureMessage.textContent =
@@ -480,10 +635,12 @@ function acceptSignature() {
         return;
     }
 
-    acceptedSignatureDataURL =
-        canvas.toDataURL(
-            "image/png"
-        );
+
+
+
+
+   acceptedSignatureDataURL =
+    croppedSignatureDataURL();
 
     signatureAccepted = true;
     isDrawing = false;

@@ -119,6 +119,10 @@ let signatureAccepted = false;
 let lastPoint = null;
 let acceptedSignatureDataURL = null;
 
+// NEW:
+// tenant or landlord
+let signerRole = "tenant";
+
 if (!token) {
     showError(
         "This signing link does not contain a token."
@@ -126,6 +130,7 @@ if (!token) {
 } else {
     loadSigningRequest();
 }
+
 
 // MARK: - Load Signing Request
 
@@ -151,8 +156,21 @@ async function loadSigningRequest() {
             );
         }
 
+        signerRole =
+            data.signer_role
+            || "tenant";
+
+        const signerName =
+            data.signer_name
+            || data.tenant_name
+            || (
+                signerRole === "landlord"
+                    ? "Landlord"
+                    : "Signer"
+            );
+
         tenantNameElement.textContent =
-            `${data.tenant_name}, please review and sign.`;
+            `${signerName}, please review and sign.`;
 
         requestStatusElement.textContent =
             formatStatus(
@@ -183,6 +201,7 @@ async function loadSigningRequest() {
     }
 }
 
+
 function showError(message) {
     loadingCard.classList.add(
         "hidden"
@@ -200,16 +219,21 @@ function showError(message) {
     );
 }
 
+
 function formatStatus(status) {
     if (!status) {
         return "Pending";
     }
 
     return status
-        .charAt(0)
-        .toUpperCase()
-        + status.slice(1);
+        .replaceAll("_", " ")
+        .replace(
+            /\b\w/g,
+            character =>
+                character.toUpperCase()
+        );
 }
+
 
 // MARK: - Canvas Setup
 
@@ -250,12 +274,14 @@ function resizeCanvas() {
     configureDrawingContext();
 }
 
+
 function configureDrawingContext() {
     context.lineWidth = 2.4;
     context.lineCap = "round";
     context.lineJoin = "round";
     context.strokeStyle = "#111111";
 }
+
 
 function pointFromClientCoordinates(
     clientX,
@@ -268,11 +294,13 @@ function pointFromClientCoordinates(
         x:
             clientX
             - rectangle.left,
+
         y:
             clientY
             - rectangle.top
     };
 }
+
 
 function drawToPoint(currentPoint) {
     if (
@@ -305,10 +333,12 @@ function drawToPoint(currentPoint) {
     updateAcceptButton();
 }
 
+
 function finishDrawing() {
     isDrawing = false;
     lastPoint = null;
 }
+
 
 // MARK: - Pointer Events
 
@@ -334,6 +364,7 @@ function beginPointerDrawing(event) {
     }
 }
 
+
 function continuePointerDrawing(event) {
     if (
         !isDrawing
@@ -351,6 +382,7 @@ function continuePointerDrawing(event) {
         )
     );
 }
+
 
 function endPointerDrawing(event) {
     if (!isDrawing) {
@@ -372,6 +404,7 @@ function endPointerDrawing(event) {
 
     finishDrawing();
 }
+
 
 // MARK: - iPhone Touch Events
 
@@ -398,6 +431,7 @@ function beginTouchDrawing(event) {
         );
 }
 
+
 function continueTouchDrawing(event) {
     if (
         !isDrawing
@@ -423,11 +457,13 @@ function continueTouchDrawing(event) {
     );
 }
 
+
 function endTouchDrawing(event) {
     event.preventDefault();
 
     finishDrawing();
 }
+
 
 // MARK: - Signature Actions
 
@@ -442,6 +478,7 @@ function clearCanvas() {
         rectangle.height
     );
 }
+
 
 function clearSignature() {
     if (signatureAccepted) {
@@ -458,6 +495,7 @@ function clearSignature() {
     updateAcceptButton();
 }
 
+
 function updateAcceptButton() {
     acceptButton.disabled =
         !hasSignature
@@ -465,6 +503,8 @@ function updateAcceptButton() {
         || signatureAccepted;
 }
 
+
+// MARK: - Crop Signature
 
 function croppedSignatureDataURL() {
     const pixelRatio =
@@ -619,6 +659,7 @@ function croppedSignatureDataURL() {
 }
 
 
+// MARK: - Accept Signature
 
 function acceptSignature() {
     if (!hasSignature) {
@@ -635,12 +676,8 @@ function acceptSignature() {
         return;
     }
 
-
-
-
-
-   acceptedSignatureDataURL =
-    croppedSignatureDataURL();
+    acceptedSignatureDataURL =
+        croppedSignatureDataURL();
 
     signatureAccepted = true;
     isDrawing = false;
@@ -697,6 +734,9 @@ function acceptSignature() {
         block: "center"
     });
 }
+
+
+// MARK: - Replace Signature
 
 function replaceSignature() {
     signatureAccepted = false;
@@ -755,6 +795,7 @@ function replaceSignature() {
     updateAcceptButton();
 }
 
+
 function formattedSigningDate() {
     return new Intl.DateTimeFormat(
         undefined,
@@ -769,6 +810,20 @@ function formattedSigningDate() {
         new Date()
     );
 }
+
+
+// MARK: - Endpoint Selection
+
+function completionEndpoint() {
+    if (
+        signerRole === "landlord"
+    ) {
+        return "https://ltatudiuhozwbufqybxd.supabase.co/functions/v1/complete-landlord-signing";
+    }
+
+    return "https://ltatudiuhozwbufqybxd.supabase.co/functions/v1/complete-signing";
+}
+
 
 // MARK: - Complete Signing
 
@@ -786,26 +841,32 @@ async function completeSigning() {
     completeSigningButton.disabled = true;
 
     completeSigningButton.textContent =
-        "Completing…";
+        signerRole === "landlord"
+            ? "Completing Lease…"
+            : "Completing…";
 
     completionMessage.textContent =
         "";
 
     try {
         const endpoint =
-            "https://ltatudiuhozwbufqybxd.supabase.co/functions/v1/complete-signing";
+            completionEndpoint();
 
         const response =
             await fetch(
                 endpoint,
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
+
                     body: JSON.stringify({
-                        token: token,
+                        token:
+                            token,
+
                         signature_data_url:
                             acceptedSignatureDataURL
                     })
@@ -834,7 +895,9 @@ async function completeSigning() {
         );
 
         requestStatusElement.textContent =
-            "Signed";
+            signerRole === "landlord"
+                ? "Completed"
+                : "Signed";
 
         requestStatusElement.classList.add(
             "status-badge-success"
@@ -850,20 +913,66 @@ async function completeSigning() {
                 "p"
             );
 
+        const smallNote =
+            testCompletionCard.querySelector(
+                ".small-note"
+            );
+
         if (completionHeading) {
             completionHeading.textContent =
-                "Document signed";
+                signerRole === "landlord"
+                    ? "Lease fully signed"
+                    : "Document signed";
         }
 
         if (completionText) {
-            completionText.textContent =
-                "Your signature was saved successfully.";
+            if (
+                signerRole === "landlord"
+            ) {
+                completionText.textContent =
+                    "The landlord signature was saved and the lease is now fully signed.";
+            } else if (
+                data.all_tenants_signed
+            ) {
+                completionText.textContent =
+                    "Your signature was saved. All tenants have now signed and the lease is ready for the landlord.";
+            } else if (
+                typeof data.remaining_tenants
+                    === "number"
+                && data.remaining_tenants > 0
+            ) {
+                completionText.textContent =
+                    data.remaining_tenants === 1
+                        ? "Your signature was saved. Waiting for 1 other tenant to sign."
+                        : `Your signature was saved. Waiting for ${data.remaining_tenants} other tenants to sign.`;
+            } else {
+                completionText.textContent =
+                    "Your signature was saved successfully.";
+            }
+        }
+
+        if (smallNote) {
+            if (
+                signerRole === "landlord"
+            ) {
+                smallNote.textContent =
+                    "The fully executed lease has been saved securely.";
+            } else if (
+                data.all_tenants_signed
+            ) {
+                smallNote.textContent =
+                    "The tenant-signed lease is now ready for landlord signing.";
+            } else {
+                smallNote.textContent =
+                    "No further action is required from you.";
+            }
         }
 
         testCompletionCard.scrollIntoView({
             behavior: "smooth",
             block: "center"
         });
+
     } catch (error) {
         console.error(error);
 
@@ -878,6 +987,7 @@ async function completeSigning() {
             "Complete Signing";
     }
 }
+
 
 // MARK: - Event Listeners
 

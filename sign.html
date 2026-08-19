@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
 
@@ -10,21 +11,28 @@
 
     <title>Sign Document</title>
 
-  <link
-    rel="stylesheet"
-    href="styles.css?v=7"
->
+    <link
+        rel="stylesheet"
+        href="styles.css?v=9"
+    >
 </head>
 
 <body>
+
     <header class="site-header">
+
         <div class="header-content">
+
             <div>
-                <h1>EasySign</h1>
+
+                <h1>
+                    EasySign
+                </h1>
 
                 <p id="tenantName">
                     Loading document…
                 </p>
+
             </div>
 
             <span
@@ -33,72 +41,167 @@
             >
                 Pending
             </span>
+
         </div>
+
     </header>
 
     <main class="page-container">
+
+        <!-- Loading -->
+
         <section
             id="loadingCard"
             class="card loading-card"
         >
+
             <div class="spinner"></div>
 
             <p>
                 Loading your document…
             </p>
+
         </section>
+
+
+        <!-- Error -->
 
         <section
             id="errorCard"
             class="card hidden"
         >
-            <h2>Unable to open document</h2>
+
+            <h2>
+                Unable to open document
+            </h2>
 
             <p id="errorMessage">
                 The signing link may be invalid or expired.
             </p>
+
         </section>
+
+
+        <!-- Signing Content -->
 
         <div
             id="signingContent"
             class="hidden"
         >
+
+            <!-- Document Review -->
+
             <section class="card">
+
                 <div class="section-heading">
+
                     <div>
-                        <h2>Review your document</h2>
+
+                        <h2>
+                            Review your document
+                        </h2>
 
                         <p>
                             Read the complete lease before signing.
                         </p>
+
                     </div>
+
                 </div>
 
-                <iframe
-                    id="leasePDF"
-                    title="Lease agreement"
-                ></iframe>
+
+                <!-- PDF Loading -->
+
+                <div
+                    id="pdfLoading"
+                    class="pdf-loading"
+                >
+
+                    <div class="spinner"></div>
+
+                    <span>
+                        Loading complete lease…
+                    </span>
+
+                </div>
+
+
+                <!-- PDF Error -->
+
+                <div
+                    id="pdfError"
+                    class="pdf-error hidden"
+                >
+
+                    <strong>
+                        Unable to display the lease.
+                    </strong>
+
+                    <p id="pdfErrorMessage">
+                        Please try reloading this page.
+                    </p>
+
+                </div>
+
+
+                <!-- PDF Information -->
+
+                <div
+                    id="pdfToolbar"
+                    class="pdf-toolbar hidden"
+                >
+
+                    <span id="pdfPageCount">
+                        Document
+                    </span>
+
+                    <span>
+                        Scroll to review all pages
+                    </span>
+
+                </div>
+
+
+                <!-- Complete PDF -->
+
+                <div
+                    id="leasePDFViewer"
+                    class="pdf-viewer"
+                    aria-label="Complete lease agreement"
+                ></div>
+
             </section>
+
+
+            <!-- Signature -->
 
             <section
                 id="signatureCard"
                 class="card signature-section"
             >
+
                 <div class="section-heading">
+
                     <div>
-                        <h2>Your signature</h2>
+
+                        <h2>
+                            Your signature
+                        </h2>
 
                         <p>
                             Draw your signature using your finger,
                             mouse, or trackpad.
                         </p>
+
                     </div>
+
                 </div>
 
                 <div
                     id="signatureWrapper"
                     class="signature-wrapper"
                 >
+
                     <canvas
                         id="signatureCanvas"
                         aria-label="Signature drawing area"
@@ -114,6 +217,7 @@
                         id="signatureLockedOverlay"
                         class="signature-locked-overlay hidden"
                     >
+
                         <div class="accepted-checkmark">
                             ✓
                         </div>
@@ -121,10 +225,13 @@
                         <strong>
                             Signature Accepted
                         </strong>
+
                     </div>
+
                 </div>
 
                 <div class="signature-actions">
+
                     <button
                         id="clearSignatureButton"
                         class="secondary-button"
@@ -140,12 +247,14 @@
                     >
                         Replace Signature
                     </button>
+
                 </div>
 
                 <label
                     id="consentRow"
                     class="consent-row"
                 >
+
                     <input
                         id="consentCheckbox"
                         type="checkbox"
@@ -156,6 +265,7 @@
                         that this electronic signature represents
                         my intent to sign it.
                     </span>
+
                 </label>
 
                 <button
@@ -171,29 +281,42 @@
                     id="signatureMessage"
                     class="form-message"
                 ></p>
+
             </section>
+
+
+            <!-- Final Review -->
 
             <section
                 id="finalReviewCard"
                 class="card hidden"
             >
+
                 <div class="completion-heading">
+
                     <div class="completion-icon">
                         ✓
                     </div>
 
                     <div>
-                        <h2>Ready to complete</h2>
+
+                        <h2>
+                            Ready to complete
+                        </h2>
 
                         <p>
                             Review the information below before
                             submitting your signed document.
                         </p>
+
                     </div>
+
                 </div>
 
                 <div class="review-list">
+
                     <div class="review-row">
+
                         <span class="review-checkmark">
                             ✓
                         </span>
@@ -201,9 +324,11 @@
                         <span>
                             Document reviewed
                         </span>
+
                     </div>
 
                     <div class="review-row">
+
                         <span class="review-checkmark">
                             ✓
                         </span>
@@ -211,9 +336,11 @@
                         <span>
                             Signature accepted
                         </span>
+
                     </div>
 
                     <div class="review-row">
+
                         <span class="review-checkmark">
                             ✓
                         </span>
@@ -221,7 +348,9 @@
                         <span id="signedDateText">
                             Signing date recorded
                         </span>
+
                     </div>
+
                 </div>
 
                 <button
@@ -236,17 +365,24 @@
                     id="completionMessage"
                     class="form-message"
                 ></p>
+
             </section>
+
+
+            <!-- Completion -->
 
             <section
                 id="testCompletionCard"
                 class="card success-card hidden"
             >
+
                 <div class="large-success-icon">
                     ✓
                 </div>
 
-                <h2>Signing test complete</h2>
+                <h2>
+                    Signing test complete
+                </h2>
 
                 <p>
                     Your signature was captured successfully.
@@ -257,10 +393,18 @@
                     The next step will securely save the signature
                     and update the signing request in EasySign.
                 </p>
+
             </section>
+
         </div>
+
     </main>
 
-  <script src="sign.js?v=8"></script>
+    <script
+        type="module"
+        src="sign.js?v=9"
+    ></script>
+
 </body>
+
 </html>

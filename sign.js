@@ -1282,19 +1282,19 @@ function formattedSigningDate() {
 }
 
 
+
+
 // MARK: - Endpoint Selection
 
 function completionEndpoint() {
 
-    if (
-        signerRole === "landlord"
-    ) {
+    return "https://ltatudiuhozwbufqybxd.supabase.co/functions/v1/complete-document-signing";
 
-        return "https://ltatudiuhozwbufqybxd.supabase.co/functions/v1/complete-landlord-signing";
-    }
-
-    return "https://ltatudiuhozwbufqybxd.supabase.co/functions/v1/complete-signing";
 }
+
+
+
+
 
 
 // MARK: - Complete Signing

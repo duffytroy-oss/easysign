@@ -1589,9 +1589,52 @@ completeSigningButton.addEventListener(
 
 // MARK: - Window Resize
 
+// iPhone Safari changes its toolbar height
+// while scrolling.
+//
+// This can trigger resize events even though
+// the actual screen width has not changed.
+//
+// Only resize the signature canvas and
+// re-render PDF pages when the viewport
+// WIDTH changes.
+//
+// This prevents unnecessary PDF rendering
+// and scrolling interruptions.
+
+let lastLayoutWidth =
+    window.innerWidth;
+
+
 window.addEventListener(
     "resize",
     () => {
+
+        const currentWidth =
+            window.innerWidth;
+
+
+        // Ignore toolbar-related resize events.
+
+        if (
+            Math.abs(
+                currentWidth - lastLayoutWidth
+            ) < 4
+        ) {
+
+            return;
+        }
+
+
+        // The screen width genuinely changed,
+        // such as when rotating the phone.
+
+        lastLayoutWidth =
+            currentWidth;
+
+
+        // Resize signature canvas only
+        // when no signature has been drawn.
 
         if (
             !hasSignature
@@ -1601,6 +1644,10 @@ window.addEventListener(
             resizeCanvas();
         }
 
+
+        // Re-render the PDF only when
+        // the screen width changes.
+
         if (
             loadedPDFDocument
         ) {
@@ -1608,6 +1655,7 @@ window.addEventListener(
             clearTimeout(
                 pdfResizeTimer
             );
+
 
             pdfResizeTimer =
                 setTimeout(

@@ -245,6 +245,78 @@ async function loadSigningRequest() {
             data.signer_role
             || "tenant";
 
+
+
+                // MARK: - Document Type
+
+        const isInspection =
+            data.document_type === "inspection";
+
+        document.documentElement.dataset.documentType =
+            isInspection ? "inspection" : "lease";
+
+        const documentLabel =
+            isInspection
+                ? "inspection report"
+                : "lease";
+
+        // Update document review wording.
+
+        const reviewSection =
+            document.querySelector(
+                "#signingContent > section.card"
+            );
+
+        const reviewTitle =
+            reviewSection?.querySelector(
+                ".section-heading h2"
+            );
+
+        const reviewInstructions =
+            reviewSection?.querySelector(
+                ".section-heading p"
+            );
+
+        if (reviewTitle) {
+            reviewTitle.textContent =
+                `Review your ${documentLabel}`;
+        }
+
+        if (reviewInstructions) {
+            reviewInstructions.textContent =
+                `Read the complete ${documentLabel} before signing.`;
+        }
+
+        // Update PDF loading message.
+
+        const loadingLabel =
+            pdfLoading.querySelector("span");
+
+        if (loadingLabel) {
+            loadingLabel.textContent =
+                `Loading ${documentLabel}…`;
+        }
+
+        // Update PDF error heading.
+
+        const pdfErrorHeading =
+            pdfError.querySelector("strong");
+
+        if (pdfErrorHeading) {
+            pdfErrorHeading.textContent =
+                `Unable to display the ${documentLabel}.`;
+        }
+
+        // Update accessibility description.
+
+        leasePDFViewer.setAttribute(
+            "aria-label",
+            `Complete ${documentLabel}`
+        );
+
+
+        
+
         const signerName =
             data.signer_name
             || data.tenant_name

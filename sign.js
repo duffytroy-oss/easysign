@@ -1546,6 +1546,58 @@ async function completeSigning() {
             }
         }
 
+
+
+                // MARK: - Inspection Completion Wording
+
+        // Preserve the existing lease messages.
+        // Customize completed inspection reports.
+
+        if (
+            document.documentElement.dataset.documentType
+            === "inspection"
+        ) {
+
+            if (completionHeading) {
+
+                completionHeading.textContent =
+                    signerRole === "landlord"
+                        ? "Inspection report fully signed"
+                        : "Your signature was saved";
+            }
+
+            if (signerRole === "landlord") {
+
+                if (completionText) {
+
+                    completionText.textContent =
+                        "Both parties have signed the inspection report.";
+                }
+
+                if (smallNote) {
+
+                    smallNote.textContent =
+                        "The completed inspection report has been saved securely.";
+                }
+
+            } else if (data.all_tenants_signed) {
+
+                if (completionText) {
+
+                    completionText.textContent =
+                        "All tenants have signed. The inspection report is ready for the landlord.";
+                }
+
+                if (smallNote) {
+
+                    smallNote.textContent =
+                        "The tenant-signed inspection report has been saved securely.";
+                }
+            }
+        }
+
+
+        
         testCompletionCard.scrollIntoView({
 
             behavior:
